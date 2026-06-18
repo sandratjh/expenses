@@ -4,12 +4,21 @@ import "./Expenses.css";
 
 const Expenses = (props) => {
 
-    return(
-        <Card className="expenses">
-            <ExpenseItem data={props.expenses[0]}/>
-            <ExpenseItem data={props.expenses[0]}/>
-        </Card>
-    )
-}
+    props.expenses.map((expense) => {
+        console.log(expense);
+        return null;
+    });
 
-export default Expenses
+    return (
+        <Card className="expenses">
+            {props.expenses.map((expense) => (
+                <ExpenseItem
+                    key={expense.id}
+                    expenseData={expense}
+                />
+            ))}
+        </Card>
+    );
+};
+
+export default Expenses;
