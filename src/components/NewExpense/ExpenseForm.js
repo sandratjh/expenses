@@ -1,93 +1,86 @@
 import "./ExpenseForm.css";
-import { useState } from "react";
+import { Fragment, useRef, useState } from "react";
+import Error from "../UI/Error";
 
 const ExpenseForm = (props) => {
-    const [userInput, setUserInput] = useState({
-        enteredTitle: "",
-        enteredPrice: "",
-        enteredDate: ""
-    });
+    const [error, setError] = useState(null);
 
-    const titleChangeHandler = (event) => {
-        setUserInput({
-            ...userInput,
-            enteredTitle: event.target.value
-        });
-    };
+    const titleInputRef = useRef();
+    const priceInputRef = useRef();
+    const dateInputRef = useRef();
 
-    const priceChangeHandler = (event) => {
-        setUserInput({
-            ...userInput,
-            enteredPrice: event.target.value
-        });
-    };
-
-    const dateChangeHandler = (event) => {
-        setUserInput({
-            ...userInput,
-            enteredDate: event.target.value
-        });
+    const errorHandler = () => {
+        setError(null);
     };
 
     const submitHandler = (event) => {
         event.preventDefault();
 
+        const enteredTitle = titleInputRef.current.value;
+        const enteredPrice = priceInputRef.current.value;
+        const enteredDate = dateInputRef.current.value;
+
+        if (
+            enteredTitle.trim().length === 0 ||
+            enteredPrice.trim().length === 0 ||
+            enteredDate.trim().length === 0
+        ) {
+            setError({
+                title: "Invalid input",
+                message: "Please enter valid title, price and date."
+            });
+            return;
+        }
+
         const expenseData = {
-            title: userInput.enteredTitle,
-            price: userInput.enteredPrice,
-            date: new Date(userInput.enteredDate)
+            title: enteredTitle,
+            price: enteredPrice,
+            date: new Date(enteredDate)
         };
 
         props.onSaveExpenseData(expenseData);
+        props.onCancel();
 
-        setUserInput({
-            enteredTitle: "",
-            enteredPrice: "",
-            enteredDate: ""
-        });
+        titleInputRef.current.value = "";
+        priceInputRef.current.value = "";
+        dateInputRef.current.value = "";
     };
 
     return (
-        <form onSubmit={submitHandler}>
-            <div className="new-expense__controls">
+        <Fragment>
+            {error && (
+                <Error
+                    title={error.title}
+                    message={error.message}
+                    onConfirm={errorHandler}
+                />
+            )}
 
-                <div className="new-expense__control">
-                    <label>Title</label>
-                    <input
-                        type="text"
-                        onChange={titleChangeHandler}
-                        value={userInput.enteredTitle}
-                    />
+            <form onSubmit={submitHandler}>
+                <div className="new-expense__controls">
+
+                    <div className="new-expense__control">
+                        <label>Title</label>
+                        <input type="text" ref={titleInputRef} />
+                    </div>
+
+                    <div className="new-expense__control">
+                        <label>Price</label>
+                        <input type="number" min="0.01" step="0.01" ref={priceInputRef} />
+                    </div>
+
+                    <div className="new-expense__control">
+                        <label>Date</label>
+                        <input type="date" ref={dateInputRef} />
+                    </div>
+
+                    <div className="new-expense__actions">
+                        <button type="submit">Add Expense</button>
+                    </div>
+
                 </div>
-
-                <div className="new-expense__control">
-                    <label>Price</label>
-                    <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        onChange={priceChangeHandler}
-                        value={userInput.enteredPrice}
-                    />
-                </div>
-
-                <div className="new-expense__control">
-                    <label>Date</label>
-                    <input
-                        type="date"
-                        min="2024-11-12"
-                        max="2026-01-31"
-                        onChange={dateChangeHandler}
-                        value={userInput.enteredDate}
-                    />
-                </div>
-
-                <div className="new-expense__actions">
-                    <button type="submit">Add Expense</button>
-                </div>
-
-            </div>
-        </form>
+            </form>
+        </Fragment>
     );
 };
 
